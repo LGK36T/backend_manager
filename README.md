@@ -1,64 +1,56 @@
-# Backend Manager (AI Agent Skill)
+# Backend Manager
 
-Skill especializada para guiar a los agentes de Inteligencia Artificial al diseñar, codificar, refactorizar y verificar servicios backend, APIs y lógica de negocio en Node.js 22+, Express 5, TypeScript 5+, PostgreSQL 17 y Docker.
-
----
-
-## 📌 ¿Qué es este Skill?
-
-**Backend Manager** es un paquete de directrices, estándares, plantillas y patrones de diseño creado específicamente para ser consumido por agentes de IA (como Antigravity, Claude Code, Cursor, Copilot, etc.). Su objetivo es garantizar que el código generado por IA siga las mejores prácticas de la industria, previniendo vulnerabilidades, deuda técnica y garantizando **paridad e interoperabilidad total con [frontend_manager](file:///home/LGK36T/workspace/skills/frontend_manager)**.
-
-La especificación completa del comportamiento del agente se encuentra en [SKILL.md](file:///home/LGK36T/workspace/skills/backend_manager/SKILL.md).
+Skill de desarrollo backend para agentes de IA y desarrolladores. Define estándares de arquitectura por capas, convenciones de código y plantillas para servicios basados en Node.js 22+, Express 5, TypeScript, PostgreSQL 17, Zod y Docker.
 
 ---
 
-## 🎯 Directrices que impone a la IA
+## Arquitectura y Principios
 
-- **Arquitectura Limpia y Desacoplada:** Flujo unidireccional estricto entre Routers, Middlewares, Controllers, Services, Models, Queries y Stored Procedures en PostgreSQL.
-- **Paridad Total con Frontend Manager:** Respuestas estructuradas con `{ success, data: { data: T[], total }, error }` en listados y endpoints canónicos (`/getAll`, `/getById/:id`, `/create`, `/update/:id`, `/delete/:id`).
-- **Validación Tipada con Zod:** Esquemas obligatorios para todas las entradas con mensajes de error legibles y detalles estructurados.
-- **Seguridad Defensiva (Secure by Default):** Consultas parametrizadas en Stored Procedures (prevención SQL Injection), Helmet con CSP estricto, CORS controlado, Rate Limiting y `@node-rs/bcrypt` para hashing de contraseñas.
-- **Tooling Moderno (2026):** Express 5 con captura nativa de errores asíncronos, `tsx` para desarrollo rápido y TypeScript con resolución `NodeNext`.
-- **Plantillas Canónicas:** Plantillas listas para usar en cada capa del backend.
+- **Separación por capas:** Flujo unidireccional `Router` -> `Middleware` -> `Controller` -> `Service` -> `Model` -> `Query` -> `PostgreSQL (SP)`.
+- **Paridad con Frontend Manager:** Contrato unificado de respuestas `{ success, data: { data: T[], total }, error }` en listados y endpoints canónicos (`/getAll`, `/getById/:id`, `/create`, `/update/:id`, `/delete/:id`).
+- **Express 5 y TypeScript:** Manejo nativo de promesas en rutas asíncronas, resolución `NodeNext` y ejecución con `tsx`.
+- **Validación con Zod:** Esquemas estrictos por entidad para creación y actualización, con sanitización y reporte estructurado de errores.
+- **Seguridad por defecto:** Consultas parametrizadas en Stored Procedures (prevención de SQL Injection), Helmet con CSP estricto, Rate Limiting y hashing de contraseñas con `@node-rs/bcrypt`.
+- **Persistencia en base de datos:** Procedimientos almacenados en esquema `app` con serialización JSON nativa (`rows[0].data`).
 
 ---
 
-## 📂 Contenido del Repositorio
+## Estructura del Repositorio
 
 ```text
 backend_manager/
-├── SKILL.md                          # Instrucciones principales y flujo de trabajo para el agente
-├── CHANGELOG.md                      # Historial de cambios del skill
-├── LICENSE                           # Licencia de código abierto (MIT)
-├── README.md                         # Documentación y descripción del skill
-├── references/
-│   └── technical-architecture.md     # Referencia técnica exhaustiva y estándares backend
-└── resources/
-    └── templates/                    # Plantillas de código para el agente
-        ├── router.template.ts        # Endpoints Express estándar
-        ├── controller.template.ts    # Controladores puros (1 línea por método)
-        ├── service.template.ts       # Lógica de dominio y excepciones
-        ├── model.template.ts         # Acceso a base de datos (rows[0].data)
-        ├── query.template.ts         # Llamadas SQL a stored procedures
-        ├── schema.template.ts        # Esquemas de validación Zod
-        ├── interface.template.ts     # Contratos e interfaces de modelos
-        └── database-sp.template.sql  # Stored Procedures PL/pgSQL
+├── SKILL.md                          # Instrucciones y flujo de trabajo principal
+├── references/                       # Documentación técnica de referencia
+│   └── technical-architecture.md     # Especificación técnica detallada
+├── resources/
+│   └── templates/                    # Plantillas de código reutilizables
+│       ├── router.template.ts        # Enrutador Express
+│       ├── controller.template.ts    # Controlador HTTP
+│       ├── service.template.ts       # Capa de servicio y lógica de dominio
+│       ├── model.template.ts         # Modelo de datos y acceso a BD
+│       ├── query.template.ts         # Consultas SQL a Stored Procedures
+│       ├── schema.template.ts        # Esquemas Zod
+│       ├── interface.template.ts     # Interfaces y contratos de datos
+│       └── database-sp.template.sql  # Stored Procedures PL/pgSQL
+├── CHANGELOG.md                      # Historial de cambios
+├── LICENSE                           # Licencia MIT
+└── README.md                         # Este documento
 ```
 
 ---
 
-## 🚀 Uso e Integración
+## Instalación y Uso
 
-### En Google Antigravity / Asistentes IA
-Coloca este repositorio dentro del directorio de skills de tu espacio de trabajo:
+Colocar este directorio dentro de la ruta de skills del entorno de trabajo:
+
 ```bash
 .agents/skills/backend_manager/
-# o ~/.gemini/antigravity-cli/skills/backend_manager/
 ```
-El agente descubrirá automáticamente el archivo [SKILL.md](file:///home/LGK36T/workspace/skills/backend_manager/SKILL.md) y aplicará estas pautas de manera progresiva cuando interactúe con el backend.
+
+Para consultar el flujo de trabajo completo, ver [SKILL.md](./SKILL.md).
 
 ---
 
-## 📄 Licencia
+## Licencia
 
-Este proyecto está bajo la licencia [MIT](file:///home/LGK36T/workspace/skills/backend_manager/LICENSE).
+[MIT](./LICENSE)

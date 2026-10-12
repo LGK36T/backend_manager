@@ -1,8 +1,8 @@
 # Referencia Técnica — Servicios BackEnd
 
-> **Versión:** 2.0 — Actualizada con estándares 2026
+> **Versión:** 2.0
 > **Stack:** Node.js 22+ · Express 5 · TypeScript 5+ · PostgreSQL 17 · JWT · Docker
-> **Propósito:** Documento de referencia técnica integral para desarrolladores y agentes de IA. Explica la arquitectura por capas, decisiones de diseño, contratos de datos unificados con el frontend (`frontend_manager`), seguridad y patrones de implementación.
+> **Propósito:** Documento de referencia técnica para desarrolladores. Explica la arquitectura por capas, decisiones de diseño, contratos de datos unificados con el frontend (`frontend_manager`), seguridad y patrones de implementación.
 
 ---
 
@@ -127,7 +127,7 @@ yarn init -y
 }
 ```
 
-> **Estándar 2026:** Se utiliza `module: "NodeNext"` y `moduleResolution: "NodeNext"`, garantizando soporte nativo para ECMAScript Modules (ESM) y resolución moderna de paquetes en Node.js 22+.
+> Se utiliza `module: "NodeNext"` y `moduleResolution: "NodeNext"`, garantizando soporte nativo para ECMAScript Modules (ESM) y resolución moderna de paquetes en Node.js 22+.
 
 ---
 
