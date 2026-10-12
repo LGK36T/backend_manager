@@ -1,50 +1,109 @@
 ---
 name: backend-manager
 description: >-
-  Instrucciones, directrices arquitectónicas y estándares de codificación para agentes de IA al diseñar, implementar, refactorizar y verificar servicios backend, APIs y lógica de negocio.
+  Instrucciones y estándares para construir y mantener servicios backend en Node.js 22+, Express 5, TypeScript, PostgreSQL 17, Zod y Docker.
 ---
 
-# Skill: Backend Manager para Agentes de IA
+# Backend Manager
 
-Este skill define las directrices y estándares para que los agentes de IA actúen como ingenieros backend senior al diseñar, implementar y mantener servicios de servidor, APIs y lógica de negocio.
-
----
-
-## 🎯 Directrices Principales de Comportamiento
-
-Cuando el agente de IA trabaje en tareas de backend, debe cumplir rigurosamente las siguientes pautas:
-
-### 1. Arquitectura en Capas y Desacoplamiento
-- **Controladores (Controllers / Handlers):** Responsables únicamente de la entrada/salida HTTP, validación inicial del request y mapeo de códigos de estado (status codes). No deben contener lógica de negocio.
-- **Servicios (Services / Use Cases):** Concentran la lógica de negocio, validaciones de dominio y orquestación. Son completamente agnósticos del transporte (REST, gRPC, CLI).
-- **Repositorios / Acceso a Datos (Repositories / DAOs):** Encapsulan consultas a bases de datos o almacenamiento. Jamás mezclar consultas directas de datos en controladores.
-- **Middleware:** Emplear para autenticación, autorización, validación de esquemas, compresión, rate limiting y logging transversal.
-
-### 2. Validación Estricta de Tipos y Esquemas
-- Toda petición entrante (body, query params, headers, path params) debe validarse contra un esquema tipado (ej. Zod, Joi, Pydantic, DTOs).
-- Jamás confiar en datos externos sin parsear y sanitizar antes de enviarlos a la capa de servicios.
-
-### 3. Seguridad por Defecto (Secure by Default)
-- **Prevención de Inyecciones:** Usar consultas parametrizadas u ORMs que prevengan SQL/NoSQL Injection.
-- **Autenticación y Autorización:** Validar tokens (JWT/Session) en middlewares dedicados; nunca confiar ciegamente en IDs de usuario provistos en el body.
-- **Manejo Seguro de Secretos:** Nunca quemar (hardcodear) claves, tokens o URIs de conexión. Usar variables de entorno seguras.
-- **CORS y Cabeceras:** Configurar CORS estricto y cabeceras de seguridad HTTP (Helmet, CSP, HSTS).
-
-### 4. Manejo Defensivo de Excepciones y Errores
-- Utilizar errores de dominio estructurados (ej. `NotFoundError`, `UnauthorizedError`, `ValidationError`).
-- Capturar excepciones en un middleware global de errores.
-- Nunca exponer trazas de error (stack traces) ni detalles internos de la base de datos en respuestas de producción.
-
-### 5. Estándares de Pruebas y Verificación
-- Diseñar y actualizar pruebas unitarias para la lógica en `services`.
-- Verificar códigos de respuesta HTTP estándar (200, 201, 400, 401, 403, 404, 500).
-- Ejecutar linters y suite de pruebas antes de dar por completada una tarea.
+Guía de arquitectura y flujo de desarrollo para servicios backend en Node.js 22+, Express 5, TypeScript, PostgreSQL 17, Zod y Docker.
 
 ---
 
-## 🚫 Acciones Prohibidas para el Agente
+## Arquitectura por Capas
 
-- ❌ Escribir controladores monolíticos con acceso directo a base de datos.
-- ❌ Ignorar errores con bloques vacíos (`catch (e) {}` o `except: pass`).
-- ❌ Deshabilitar validaciones de seguridad o reglas CORS en producción.
-- ❌ Almacenar contraseñas sin hashing seguro (Argon2, bcrypt).
+El flujo de procesamiento de peticiones es estrictamente unidireccional:
+
+```
+Request -> Router -> Middleware -> Controller -> Service -> Model -> Query -> PostgreSQL (SP)
+                                                                                ↓
+Response <- Controller <- Service <- Model <- rows[0].data ─────────────────────┘
+```
+
+Documentación detallada en [Guía de Arquitectura Técnica](./references/technical-architecture.md).
+
+---
+
+## Flujo de Trabajo
+
+Al implementar o modificar un módulo (feature), seguir este orden:
+
+### 1. Diseñar Stored Procedures en PostgreSQL
+- Ubicación / Esquema: siempre en `app.{entity}_*`.
+- En listados (`_get_all`): retornar `{ data: json_agg(...), total: count(*) }`.
+- En operaciones individuales: retornar la fila como `jsonb` o `{ deleted: true }`.
+- Referencia: [database-sp.template.sql](./resources/templates/database-sp.template.sql).
+
+### 2. Definir Interfaces
+- Ubicación: `src/interfaces/models/{entity}.ts`.
+- Mantener paridad con los contratos del frontend.
+- Exportar `I{Entity}`, `I{Entity}GetAllResponse`, `I{Entity}CreatePayload`, `I{Entity}UpdatePayload`.
+- Referencia: [interface.template.ts](./resources/templates/interface.template.ts).
+
+### 3. Declarar Consultas SQL
+- Ubicación: `src/queries/{entity}.ts`.
+- Declarar llamadas a stored procedures (`SELECT app.{entity}_*(...) AS data`).
+- Sin SQL inline ni concatenación de cadenas.
+- Referencia: [query.template.ts](./resources/templates/query.template.ts).
+
+### 4. Implementar Modelo
+- Ubicación: `src/models/{entity}.ts`.
+- Ejecutar consultas vía pool de `pg` y extraer `result.rows[0]?.data`.
+- En listados vacíos, devolver `{ data: [], total: 0 }`.
+- Referencia: [model.template.ts](./resources/templates/model.template.ts).
+
+### 5. Crear Esquemas de Validación
+- Ubicación: `src/schemas/{entity}.ts`.
+- Definir esquemas con Zod (`create{Entity}Schema`, `update{Entity}Schema`).
+- Aplicar `.trim()` y sanitizaciones obligatorias.
+- Referencia: [schema.template.ts](./resources/templates/schema.template.ts).
+
+### 6. Desarrollar Capa de Servicio
+- Ubicación: `src/services/{entity}.ts`.
+- Concentrar reglas de negocio, validaciones de dominio y orquestación.
+- Lanzar errores estructurados (`NotFoundError`, `ConflictError`, `ValidationError`).
+- No importar tipos ni utilidades de transporte HTTP (`express`, `req`, `res`).
+- Referencia: [service.template.ts](./resources/templates/service.template.ts).
+
+### 7. Implementar Controlador
+- Ubicación: `src/controllers/{entity}.ts`.
+- Adaptador HTTP puro. Cada función extrae parámetros, invoca al servicio y responde mediante `sendResponse`.
+- No incluir lógica de dominio ni condicionales de negocio.
+- Referencia: [controller.template.ts](./resources/templates/controller.template.ts).
+
+### 8. Configurar Rutas y Middlewares
+- Ubicación: `src/routers/{entity}.ts`.
+- Encadenar `authenticate`, `validateRequest` y el controlador.
+- Endpoints estándar:
+  - `GET /getAll`
+  - `GET /getById/:id`
+  - `POST /create`
+  - `PUT /update/:id`
+  - `DELETE /delete/:id`
+- Registrar el recurso en `src/routers/index.ts` bajo `/api/v1/{entity}`.
+- Referencia: [router.template.ts](./resources/templates/router.template.ts).
+
+### 9. Verificación
+```bash
+yarn typecheck || npx tsc --noEmit
+yarn test || npx vitest run
+```
+
+---
+
+## Reglas Estrictas
+
+- Mantener la estructura `{ data: T[], total: number }` en respuestas de colecciones (`getAll`).
+- Utilizar `/create`, `/update/:id` y `/delete/:id` para coincidir con los servicios de `frontend_manager`.
+- Montar las rutas de autenticación bajo el prefijo versionado (`/api/v1/auth`).
+- En `validateRequest`, responder con un mensaje descriptivo en `error` (string) y el desglose en `details`.
+- Toda interacción con la base de datos debe ejecutarse mediante Stored Procedures del esquema `app`.
+- No escribir lógica de negocio en controladores.
+- Usar `crypto.randomUUID()` nativo en lugar de dependencias externas para UUID.
+
+---
+
+## Referencias y Plantillas
+
+- [Guía de Arquitectura Técnica](./references/technical-architecture.md)
+- [Plantillas de Código](./resources/templates/)
