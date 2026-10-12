@@ -1,82 +1,52 @@
-# Backend Manager
+# Backend Manager (AI Agent Skill)
 
-Módulo encargado de la orquestación, gestión y administración de servicios de backend, APIs, lógica de negocio y comunicación de servicios dentro del ecosistema.
-
----
-
-## 📌 Descripción General
-
-**Backend Manager** centraliza las directrices, arquitecturas y herramientas necesarias para el desarrollo, despliegue y mantenimiento de los servicios backend. Su propósito es proveer una estructura sólida, desacoplada y escalable para el procesamiento de peticiones, autenticación, orquestación de microservicios y exposición de endpoints robustos.
+Skill especializada para guiar a los agentes de Inteligencia Artificial al diseñar, codificar, refactorizar y verificar servicios backend, APIs y lógica de negocio.
 
 ---
 
-## 🎯 Objetivos y Responsabilidades
+## 📌 ¿Qué es este Skill?
 
-- **Gestión de APIs y Endpoints:** Diseño, estandarización y versionado de interfaces REST, GraphQL o gRPC.
-- **Lógica de Negocio:** Encapsulamiento de reglas de negocio, validaciones y flujos operativos.
-- **Seguridad y Autenticación:** Manejo de sesiones, JWT, control de acceso basado en roles (RBAC) y sanitización de entradas.
-- **Interoperabilidad:** Coordinación e integración fluida con `database_manager`, `workers_manager` y servicios externos.
-- **Observabilidad y Registro:** Centralización de logs estructurados, métricas de rendimiento y trazabilidad de solicitudes.
+**Backend Manager** es un paquete de directrices, estándares y patrones de diseño creado específicamente para ser consumido por agentes de IA (como Antigravity, Claude Code, Cursor, Copilot, etc.). Su objetivo es garantizar que el código generado por IA siga las mejores prácticas de la industria, previniendo vulnerabilidades y deuda técnica.
+
+La especificación completa del comportamiento del agente se encuentra en [SKILL.md](file:///home/LGK36T/workspace/skills/backend_manager/SKILL.md).
 
 ---
 
-## 📂 Estructura del Proyecto
+## 🎯 Directrices que impone a la IA
+
+- **Arquitectura Limpia:** Separación estricta entre Controladores, Servicios y Repositorios.
+- **Validación Tipada:** Esquemas obligatorios para todas las entradas de datos (body, query, params).
+- **Seguridad Defensiva:** Prevención de inyecciones SQL/NoSQL, sanitización, autenticación robusta y manejo seguro de secretos.
+- **Gestión de Errores:** Errores de dominio semánticos y middleware global de excepciones sin fugas de información interna.
+- **Verificación Continua:** Pruebas unitarias y de integración automáticas para cada endpoint o servicio modificado.
+
+---
+
+## 📂 Contenido del Repositorio
 
 ```text
 backend_manager/
-├── src/
-│   ├── config/          # Configuraciones generales de entorno
-│   ├── controllers/     # Controladores y manejadores de peticiones
-│   ├── middlewares/     # Interceptores y filtros de seguridad/validación
-│   ├── models/          # Entidades y esquemas de datos
-│   ├── routes/          # Definición de rutas y endpoints
-│   ├── services/        # Lógica de negocio y orquestación
-│   └── utils/           # Utilidades y funciones auxiliares
-├── tests/               # Pruebas unitarias y de integración
-├── .gitignore           # Exclusiones de control de versiones
-├── CHANGELOG.md         # Historial de versiones y cambios
-└── README.md            # Documentación general del módulo
+├── SKILL.md             # Instrucciones principales para el agente de IA
+├── CHANGELOG.md         # Historial de cambios del skill
+├── LICENSE              # Licencia de código abierto (MIT)
+├── README.md            # Documentación y descripción del skill
+└── .gitignore           # Exclusiones de control de versiones
 ```
 
 ---
 
-## 🚀 Inicio Rápido
+## 🚀 Uso e Integración
 
-### Requisitos Previos
-
-- Entorno de ejecución configurado (según el stack definido, ej. Node.js, Python, Go, etc.).
-- Gestor de dependencias correspondiente.
-- Variables de entorno configuradas a partir de `.env.example`.
-
-### Configuración
-
-1. Clonar el repositorio:
-   ```bash
-   git clone <URL_DEL_REPOSITORIO>/backend_manager.git
-   cd backend_manager
-   ```
-
-2. Configurar variables de entorno:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Iniciar el servicio en entorno de desarrollo.
-
----
-
-## 🔄 Flujo de Trabajo con Git
-
-1. Crear una rama descriptiva para cada funcionalidad o corrección:
-   ```bash
-   git checkout -b feature/nueva-funcionalidad
-   ```
-2. Realizar commits siguiendo la convención de [Conventional Commits](https://www.conventionalcommits.org/).
-3. Mantener actualizado el archivo [CHANGELOG.md](file:///home/LGK36T/workspace/skills/backend_manager/CHANGELOG.md).
-4. Abrir un Pull Request / Merge Request para revisión.
+### En Google Antigravity / Asistentes IA
+Coloca este repositorio dentro del directorio de skills de tu espacio de trabajo:
+```bash
+.agents/skills/backend_manager/
+# o ~/.gemini/antigravity-cli/skills/backend_manager/
+```
+El agente descubrirá automáticamente el archivo `SKILL.md` y aplicará estas pautas de manera progresiva cuando interactúe con el backend.
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está bajo los términos y directrices definidos por el equipo de desarrollo.
+Este proyecto está bajo la licencia [MIT](file:///home/LGK36T/workspace/skills/backend_manager/LICENSE).
