@@ -83,16 +83,25 @@ Al implementar o modificar un módulo (feature), seguir este orden:
 - Registrar el recurso en `src/routers/index.ts` bajo `/api/v1/{entity}`.
 - Referencia: [router.template.ts](./resources/templates/router.template.ts).
 
-### 9. Verificación
+### 9. Diseñar e Implementar Pruebas Automatizadas (Obligatorio)
+- Ubicación: `tests/schemas/{entity}.test.ts`, `tests/services/{entity}.test.ts`, `tests/controllers/{entity}.test.ts`.
+- Pruebas unitarias para esquemas Zod (validación de formatos y sanitización `.trim()`).
+- Pruebas unitarias para la capa de servicio con modelos desacoplados o mockeados.
+- Pruebas de integración HTTP para enrutadores y controladores verificando códigos de estado canónicos (`200`, `201`, `202`, `400`, `404`).
+- Referencia: Skill `testing_manager` en `/home/LGK36T/workspace/skills/testing_manager`.
+
+### 10. Verificación y Pase de Pruebas (Política de Cero Fallos)
 ```bash
+yarn test || npx tsx --test tests/**/*.test.ts
 yarn typecheck || npx tsc --noEmit
-yarn test || npx vitest run
 ```
+**Regla ineludible:** Si un solo test falla, la tarea NO puede darse por completada ni enviarse a control de versiones.
 
 ---
 
 ## Reglas Estrictas
 
+- **Todo debe tener test y pasarlo:** Prohibido commitear o cerrar una feature sin suite de pruebas automatizadas aprobadas con 0 fallos.
 - Mantener la estructura `{ data: T[], total: number }` en respuestas de colecciones (`getAll`).
 - Utilizar `/create`, `/update/:id` y `/delete/:id` para coincidir con los servicios de `frontend_manager`.
 - Montar las rutas de autenticación bajo el prefijo versionado (`/api/v1/auth`).
@@ -106,4 +115,6 @@ yarn test || npx vitest run
 ## Referencias y Plantillas
 
 - [Guía de Arquitectura Técnica](./references/technical-architecture.md)
+- [Skill Testing Manager](/home/LGK36T/workspace/skills/testing_manager/SKILL.md)
 - [Plantillas de Código](./resources/templates/)
+
